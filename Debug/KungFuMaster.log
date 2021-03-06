@@ -1,0 +1,15 @@
+﻿  kungFuMaster.cpp
+C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\camera.h(20,48): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\camera.h(21,49): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(101,71): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(101,36): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(126,63): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(126,32): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(190,82): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(191,83): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(195,49): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(196,49): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\game.h(199,1): warning C4305: '-=': truncation from 'double' to 'float'
+C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\audiomanager.h(30): warning C4715: 'AudioManager::getMusic': not all control paths return a value
+C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\audiomanager.h(36): warning C4715: 'AudioManager::getSound': not all control paths return a value
+  KungFuMaster.vcxproj -> C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\Debug\KungFuMaster.exe
