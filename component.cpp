@@ -67,8 +67,8 @@ void CollideComponent::Update(float dt)
 void RigidBodyComponent::Create(Engine* engine, GameObject* go, std::set<GameObject*>* game_objects)
 {
 	Component::Create(engine, go, game_objects);
-	this->rigidBodyRect.x = 0;
-	this->rigidBodyRect.y = 0;
+	velocity.x = 0;
+	velocity.y = 0;
 }
 
 

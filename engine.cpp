@@ -204,10 +204,11 @@ void Sprite::draw(int x, int y)
 	SDL_QueryTexture(texture, NULL, NULL, &(rect.w), &(rect.h));
 
 	//Render texture to screen
-	SDL_RenderCopy(renderer, texture, NULL, &rect);
+	//SDL_RenderCopy(renderer, texture, NULL, &rect);
+	SDL_RenderCopyEx(renderer, texture, NULL, &rect, 0, NULL, SDL_FLIP_NONE);
 }
 
-void Sprite::draw(int x, int y, int frames, SDL_Rect* textureRect)
+void Sprite::draw(int x, int y, int frames, SDL_Rect* textureRect, bool flip)
 {
 	SDL_Rect windowRect;
 	windowRect.x = x;
@@ -216,12 +217,12 @@ void Sprite::draw(int x, int y, int frames, SDL_Rect* textureRect)
 	windowRect.w /= frames;
 	
 	//Animate Texture
-	SDL_RenderCopy(renderer, texture, textureRect, &windowRect);
+	SDL_RenderCopyEx(renderer, texture, textureRect, &windowRect, 0, NULL, flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 }
 
 void Sprite::draw(SDL_Rect rect) {
 	SDL_QueryTexture(texture, NULL, NULL, &(rect.w), &(rect.h));
-	SDL_RenderCopy(renderer, texture, NULL, &rect);
+	SDL_RenderCopyEx(renderer, texture, NULL, &rect, 0, NULL, SDL_FLIP_NONE);
 }
 
 void Sprite::drawBackground(SDL_Rect* rect) {

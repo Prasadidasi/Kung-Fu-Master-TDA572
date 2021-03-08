@@ -14,11 +14,8 @@ class Animator {
 	SDL_Rect textureRect;
 	const int player_height = 63;
 
-	std::map<SDL_KeyCode, Sprite*> playerSprites;
-	std::map<SDL_KeyCode, Sprite*>::iterator playeritr;
-
-	std::map<char*, Sprite*> enemySprites;
-	std::map<char*, Sprite*>::iterator enemyItr;
+	std::map<char*, Sprite*> sprites;
+	std::map<char*, Sprite*>::iterator spriteItr;
 
 	std::map<Sprite*, std::pair<int, SDL_Rect>> spriteAttrib;
 	std::map<Sprite*, std::pair<int, SDL_Rect>>::iterator itrAtb;
@@ -50,20 +47,7 @@ public:
 		texRect.w /= totalFrames;
 
 		std::pair<int, SDL_Rect>attribPair(totalFrames, texRect);
-		enemySprites.insert(std::pair<char*, Sprite*>(identifier, sprite));
-		spriteAttrib.insert(std::make_pair(sprite, attribPair));
-	}
-
-	void AddSpriteSheet(Engine* engine, const char* sprite_name, int totalFrames, SDL_KeyCode direction) {
-		Sprite* sprite = engine->createSprite(sprite_name);
-		SDL_Rect texRect;
-		texRect.x = 0;
-		texRect.y = 0;
-		sprite->getDimensions(&texRect);
-		texRect.w /= totalFrames;
-
-		std::pair<int, SDL_Rect>attribPair(totalFrames, texRect);
-		playerSprites.insert(std::pair<SDL_KeyCode, Sprite*>(direction, sprite));
+		sprites.insert(std::pair<char*, Sprite*>(identifier, sprite));
 		spriteAttrib.insert(std::make_pair(sprite, attribPair));
 	}
 
@@ -77,27 +61,19 @@ public:
 			return enemy->animIds[1];	//Attack
 	}
 
-	void getEnemySprite(char* enemyId) {
-		enemyItr = enemySprites.find(enemyId);
-		if (enemyItr == enemySprites.end())
+	void getSprite(char* spriteId) {
+		spriteItr = sprites.find(spriteId);
+		if (spriteItr == sprites.end())
 			return;
 
-		spriteSheet = enemyItr->second;
+		spriteSheet = spriteItr->second;
 		itrAtb = spriteAttrib.find(spriteSheet);
 		textureRect = itrAtb->second.second;
 		totalFrames = itrAtb->second.first;
-	}
-
-	void getPlayerSprite(SDL_KeyCode direction) {
-		playeritr = playerSprites.find(direction);
-		spriteSheet = playeritr->second;
-		itrAtb = spriteAttrib.find(spriteSheet);
-		totalFrames = itrAtb->second.first;
-		textureRect = itrAtb->second.second;
 	}
 
 	void enemyHit(Camera* camera, GameObject* go, char* enemyId) {
-		getEnemySprite(enemyId);
+		getSprite(enemyId);
 		spriteSheet->draw(go->position.x - camera->window.x, go->position.y + camera->window.y, 1, &textureRect);
 	}
 
@@ -107,12 +83,16 @@ public:
 
 		if (player != nullptr) {
 			SDL_Log("Player died");
-			
+			getSprite("PLAYER_DEATH");
+			player->position.y += deathSpeed/5;
+			animateDeath(camera, player->position, spriteSheet);
+			if (player->position.y > SCREEN_HEIGHT + textureRect.h)
+				player->Send(LEVEL_RESTART);
 		}
 
 		if (enemy != nullptr && enemyPool != nullptr) {
 			SDL_Log("Enemy Died");
-			getEnemySprite(enemy->animIds[3]);
+			getSprite(enemy->animIds[3]);
 			enemy->position.y += deathSpeed;
 			enemy->position.x -= int(deathSpeed/2);
 			animateDeath(camera, enemy->position, spriteSheet);
@@ -127,14 +107,10 @@ public:
 		spriteSheet->draw(position.x - camera->window.x, position.y + camera->window.y, totalFrames, &textureRect);
 	}
 
-	void changeAnimations(Player* player, Enemy* enemy, Camera* camera) {
-		
-	}
-
 	void removeEnemyAnimation(Enemy* killedEnemy, ObjectPool<Enemy>* enemyPool) {
 		for (auto enemy = enemyPool->pool.begin(); enemy != enemyPool->pool.end(); enemy++) {
 			if (*enemy == killedEnemy) {
-				getEnemySprite((*enemy)->animIds[2]);
+				getSprite((*enemy)->animIds[2]);
 				enemyPool->pool.erase(enemy);
 				break;
 			}
@@ -142,33 +118,90 @@ public:
 
 		if (enemyPool->pool.begin() == enemyPool->pool.end())
 			for (char* enemyId : killedEnemy->animIds) {
-				enemyItr = enemySprites.find(enemyId);
-				if (enemyItr == enemySprites.end())
+				spriteItr = sprites.find(enemyId);
+				if (spriteItr == sprites.end())
 					continue;
-				enemySprites.erase(enemyItr);
+				sprites.erase(spriteItr);
 			}
 	}
 
-	void animateGo(GameObject* gameObj, Camera* camera, ObjectPool<Enemy>* enemyPool, SDL_KeyCode direction = SDLK_UNKNOWN, char* enemyId = nullptr) {		
-		if (!gameObj->enabled) {
-			handleDeath(camera, gameObj, enemyPool);
+	void setFaceDirection() {
+
+		Engine::KeyStatus keys;
+		engine->getKeyStatus(keys);
+
+		if (faceDirection == -1 && keys.right) {
+			faceDirection = 1;
+		}
+		if (faceDirection == 1 && keys.left) {
+			faceDirection = -1;
+		}
+		if (faceDirection == 0 && keys.right) {
+			faceDirection = 1;
+		}
+	}
+
+	void handleMultipleInput() {
+
+	}
+
+	void animatePlayer(GameObject* go, Camera* camera) {
+		if (!go->enabled) {
+			handleDeath(camera, go);
 			return;
 		}
 
-		if (enemyId == nullptr) {
-			playeritr = playerSprites.find(direction);
-			if (playeritr == playerSprites.end()) {
-				spriteSheet = idleSprite;
-				totalFrames = 1;
-				idleSprite->getDimensions(&textureRect);
-			}
-			else 
-				getPlayerSprite(direction);
-			
-		}
-		else 
-			getEnemySprite(enemyId);
+		SDL_KeyCode keyPressed;
+		engine->getKeyPressed(keyPressed);
+		char* spriteId = NULL;
 		
+		switch (keyPressed) {
+			case SDLK_UNKNOWN:
+				spriteId = "PLAYER_IDLE";
+				break;
+			case SDLK_RIGHT:
+			case SDLK_LEFT:
+				spriteId = "PLAYER_LEFT";
+				break;
+			case SDLK_UP:
+				spriteId = "PLAYER_UP";
+				break;
+			case SDLK_DOWN:
+				spriteId = "PLAYER_DOWN";
+				break;
+			case SDLK_a:
+				spriteId = "PLAYER_KICK";
+				break;
+			case SDLK_d:
+				spriteId = "PLAYER_PUNCH";
+				break;
+			default:
+				spriteId = "PLAYER_IDLE";
+				break;
+		}
+
+		getSprite(spriteId);
+		int frame = (SDL_GetTicks() / 100) % totalFrames; //TODO: have better timer implementation
+		(textureRect).x = frame * (textureRect).w;
+
+		go->collideRect.h = textureRect.h;    		//Set bounding box collider dimension to draw dimensions
+		go->collideRect.w = textureRect.w;			//ugly implementation I know
+		go->collideRect.x = go->position.x + (PLAYER_WIDTH - textureRect.w) - camera->window.x; //screen space coords for rendering
+		go->collideRect.y = go->position.y + (PLAYER_HEIGHT - textureRect.h) + camera->window.y;
+		spriteSheet->draw(go->collideRect.x, go->collideRect.y, totalFrames, &textureRect, faceDirection == 1? true : false);
+
+	}
+
+	void animateGo(GameObject* go, Camera* camera, ObjectPool<Enemy>* enemyPool, char* spriteId) {		
+		Enemy* enemy = (Enemy*)go;
+		if (!go->enabled) {
+			if (enemy != nullptr && enemy->spawned)
+				handleDeath(camera, go, enemyPool);
+			return;
+		}
+		
+		getSprite(spriteId);
+
 		/*Uint32 current = engine->getElapsedTime();
 		float dT = (current - dt)*10;
 		int framesToUpdate = floor(dT * 2); 
@@ -182,25 +215,20 @@ public:
 		int frame = (SDL_GetTicks() / 100) % totalFrames; //TODO: have better timer implementation
 		(textureRect).x = frame * (textureRect).w;
 
-		//Set bounding box collider dimension to draw dimensions
-		//ugly implementation I know
+		bool flip = false;
+		if (enemy != nullptr)
+			flip = enemy->flip;						
 
-		gameObj->collideRect.h = textureRect.h;
-		gameObj->collideRect.w = textureRect.w;
-		if (enemyId == nullptr) {
-			gameObj->collideRect.x = gameObj->position.x + (PLAYER_WIDTH - textureRect.w) - camera->window.x; //screen space coords for rendering
-			gameObj->collideRect.y = gameObj->position.y + (PLAYER_HEIGHT - textureRect.h) + camera->window.y;
-			spriteSheet->draw(gameObj->collideRect.x, gameObj->collideRect.y, totalFrames, &textureRect);
-		}
-		else{
-			gameObj->collideRect.x = gameObj->position.x - camera->window.x;
-			gameObj->collideRect.y = gameObj->position.y + camera->window.y;
-			spriteSheet->draw(int(gameObj->position.x - camera->window.x), int(gameObj->position.y + camera->window.y), totalFrames, &textureRect);
-		}
+		go->collideRect.h = textureRect.h;    		//Set bounding box collider dimension to draw dimensions
+		go->collideRect.w = textureRect.w;			//ugly implementation I know
+		go->collideRect.x = go->position.x - camera->window.x;
+		go->collideRect.y = go->position.y + camera->window.y;
+		spriteSheet->draw(int(go->position.x - camera->window.x), int(go->position.y + camera->window.y), totalFrames, &textureRect, flip);
+		
 	}
 
 	void Destroy() {
-		playerSprites.clear();
-		enemySprites.clear();
+		sprites.clear();
+		sprites.clear();
 	}
 };

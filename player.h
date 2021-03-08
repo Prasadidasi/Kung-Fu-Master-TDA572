@@ -33,17 +33,12 @@ public:
 			//	Send(GAME_OVER);
 		}
 
-		if (m == GRAB) {
-			if (grabbed == false) {
-				go->position.x -= 10;
-				grabbed = true;
-			}
-		}
-	}
-
-	void RemoveLife()
-	{
-		lives--;
+		//if (m == GRAB) {
+		//	if (grabbed == false) {
+		//		go->position.x -= 5;
+		//		grabbed = true;
+		//	}
+		//}
 	}
 };
 
@@ -52,8 +47,13 @@ class PlayerBehaviourComponent : public Component
 	float time_fire_pressed;	// time from the last time the fire button was pressed
 	const double rightCorner = 50;
 	Vector2D velocity;
+	double stepHeight = 13;
+	double stepWidth = 8;
 
 public:
+	bool isLevelOver = false;
+	bool step = false;
+	bool stride = true;
 	virtual ~PlayerBehaviourComponent() {}
 
 	virtual void Create(Engine* engine, GameObject * go, std::set<GameObject*> * game_objects)
@@ -70,6 +70,17 @@ public:
 
 	virtual void Update(float dt)
 	{
+		if (int(go->position.x) == 120 && isLevelOver == false) {
+			go->Send(LEVEL_WIN);
+			return;
+		}
+
+		if (isLevelOver == true) {
+			if (go->position.x >= 20 || go->position.y >= 80) 
+				MoveOnStairs(dt);
+			return;
+		}
+		
 		Engine::KeyStatus keys;
 		engine->getKeyStatus(keys);
 		if (keys.right) {
@@ -80,6 +91,19 @@ public:
 			velocity.x = -PLAYER_SPEED * dt;
 			Move();
 		}
+	}
+
+	void MoveOnStairs(float dt) {
+		SDL_Delay(200);
+		if (stride && !step) {
+			go->position.x = go->position.x - stepWidth;
+		}
+		if (step && !stride) {
+			go->position.y = go->position.y - stepHeight;
+		}
+
+		stride = stride ? false : true;
+		step = step ? false : true;
 	}
 
 	// move the player left or right

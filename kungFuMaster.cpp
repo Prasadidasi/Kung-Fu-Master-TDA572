@@ -10,7 +10,8 @@
 #define PLAYER_WIDTH 24
 #define PLAYER_SPEED 10
 #define MAX_LIVES 3
-#define ENEMY_SPEED 9
+#define ENEMY_SPEED 15
+#define KNIFE_SPEED 12
 
 const float GAME_SPEED = 10.f; //adjust speed according to levels
 
@@ -19,8 +20,9 @@ const float GAME_SPEED = 10.f; //adjust speed according to levels
 #include "vector2D.h"
 #include "game_object.h"
 #include "component.h"
-#include "enemy.h"
+#include "knife.h"
 #include "player.h"
+#include "enemy.h"
 #include "camera.h"
 #include "animator.h"
 #include "audiomanager.h"

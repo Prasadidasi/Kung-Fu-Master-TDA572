@@ -25,7 +25,7 @@ public:
 	// Valid coordinates are between (0,0) (upper left) and (width-32, height-32) (lower right).
 	// (All sprites are 32*32 pixels, clipping is not supported)
 	void draw(int x, int y);
-	void draw(int x, int y, int frames, SDL_Rect* windowRect);
+	void draw(int x, int y, int frames, SDL_Rect* windowRect, bool flip = false);
 	void draw(SDL_Rect rect);
 	void drawBackground(SDL_Rect* rect);
 	void RenderHPBar(int x, int y, float Percent, SDL_Color FGColor);
