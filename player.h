@@ -29,16 +29,10 @@ public:
 		{
 			grabbed = false;
 			SDL_Log("Player::Hit!");
-			//if (lives < 0)
-			//	Send(GAME_OVER);
 		}
 
-		//if (m == GRAB) {
-		//	if (grabbed == false) {
-		//		go->position.x -= 5;
-		//		grabbed = true;
-		//	}
-		//}
+		if (m == GRAB) 
+			grabbed = true;
 	}
 };
 
@@ -63,14 +57,16 @@ public:
 		this->velocity.y = 0;
 	}
 
-	virtual void Init()
-	{
+	virtual void Init() {}
 
+	bool inRange(int low, int high) {
+		int x = int(go->position.x);
+		return ((x - high) * (x - low) <= 0);
 	}
 
 	virtual void Update(float dt)
 	{
-		if (int(go->position.x) == 120 && isLevelOver == false) {
+		if (inRange(110,120) && isLevelOver == false) {
 			go->Send(LEVEL_WIN);
 			return;
 		}

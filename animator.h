@@ -84,38 +84,32 @@ public:
 		if (player != nullptr) {
 			SDL_Log("Player died");
 			getSprite("PLAYER_DEATH");
-			player->position.y += deathSpeed/5;
-			animateDeath(camera, player->position, spriteSheet);
+			player->position.y += deathSpeed / 5;
+			animateDeath(camera, player->position, spriteSheet, 1000);
 			if (player->position.y > SCREEN_HEIGHT + textureRect.h)
 				player->Send(LEVEL_RESTART);
 		}
 
-		if (enemy != nullptr && enemyPool != nullptr) {
-			SDL_Log("Enemy Died");
+		if (enemy != nullptr && enemyPool != nullptr && !enemy->dead) {
 			getSprite(enemy->animIds[3]);
 			enemy->position.y += deathSpeed;
-			enemy->position.x -= int(deathSpeed/2);
+			enemy->position.x -= int(deathSpeed / 2);
 			animateDeath(camera, enemy->position, spriteSheet);
-			if (enemy->position.y > SCREEN_HEIGHT + textureRect.h)
+			if (enemy->position.y > SCREEN_HEIGHT + textureRect.h) {
 				removeEnemyAnimation(enemy, enemyPool);
+				enemy->dead = true;
+				SDL_Log("ENEMY DEAD");
+			}
 		}
 	}
 
-	void animateDeath(Camera* camera, Vector2D position, Sprite* spriteSheet) {
-		int frame = (SDL_GetTicks() / 100) % totalFrames; 
+	void animateDeath(Camera* camera, Vector2D position, Sprite* spriteSheet, int delay = 100) {
+		int frame = (SDL_GetTicks() / delay) % totalFrames;
 		(textureRect).x = frame * (textureRect).w;
 		spriteSheet->draw(position.x - camera->window.x, position.y + camera->window.y, totalFrames, &textureRect);
 	}
 
 	void removeEnemyAnimation(Enemy* killedEnemy, ObjectPool<Enemy>* enemyPool) {
-		for (auto enemy = enemyPool->pool.begin(); enemy != enemyPool->pool.end(); enemy++) {
-			if (*enemy == killedEnemy) {
-				getSprite((*enemy)->animIds[2]);
-				enemyPool->pool.erase(enemy);
-				break;
-			}
-		}
-
 		if (enemyPool->pool.begin() == enemyPool->pool.end())
 			for (char* enemyId : killedEnemy->animIds) {
 				spriteItr = sprites.find(enemyId);
@@ -126,6 +120,8 @@ public:
 	}
 
 	void setFaceDirection() {
+		if (dt <= 0)
+			return;
 
 		Engine::KeyStatus keys;
 		engine->getKeyStatus(keys);
@@ -154,30 +150,30 @@ public:
 		SDL_KeyCode keyPressed;
 		engine->getKeyPressed(keyPressed);
 		char* spriteId = NULL;
-		
+
 		switch (keyPressed) {
-			case SDLK_UNKNOWN:
-				spriteId = "PLAYER_IDLE";
-				break;
-			case SDLK_RIGHT:
-			case SDLK_LEFT:
-				spriteId = "PLAYER_LEFT";
-				break;
-			case SDLK_UP:
-				spriteId = "PLAYER_UP";
-				break;
-			case SDLK_DOWN:
-				spriteId = "PLAYER_DOWN";
-				break;
-			case SDLK_a:
-				spriteId = "PLAYER_KICK";
-				break;
-			case SDLK_d:
-				spriteId = "PLAYER_PUNCH";
-				break;
-			default:
-				spriteId = "PLAYER_IDLE";
-				break;
+		case SDLK_UNKNOWN:
+			spriteId = "PLAYER_IDLE";
+			break;
+		case SDLK_RIGHT:
+		case SDLK_LEFT:
+			spriteId = "PLAYER_LEFT";
+			break;
+		case SDLK_UP:
+			spriteId = "PLAYER_UP";
+			break;
+		case SDLK_DOWN:
+			spriteId = "PLAYER_DOWN";
+			break;
+		case SDLK_a:
+			spriteId = "PLAYER_KICK";
+			break;
+		case SDLK_d:
+			spriteId = "PLAYER_PUNCH";
+			break;
+		default:
+			spriteId = "PLAYER_IDLE";
+			break;
 		}
 
 		getSprite(spriteId);
@@ -188,23 +184,23 @@ public:
 		go->collideRect.w = textureRect.w;			//ugly implementation I know
 		go->collideRect.x = go->position.x + (PLAYER_WIDTH - textureRect.w) - camera->window.x; //screen space coords for rendering
 		go->collideRect.y = go->position.y + (PLAYER_HEIGHT - textureRect.h) + camera->window.y;
-		spriteSheet->draw(go->collideRect.x, go->collideRect.y, totalFrames, &textureRect, faceDirection == 1? true : false);
+		spriteSheet->draw(go->collideRect.x, go->collideRect.y, totalFrames, &textureRect, faceDirection == 1 ? true : false);
 
 	}
 
-	void animateGo(GameObject* go, Camera* camera, ObjectPool<Enemy>* enemyPool, char* spriteId) {		
+	void animateGo(GameObject* go, Camera* camera, ObjectPool<Enemy>* enemyPool, char* spriteId) {
 		Enemy* enemy = (Enemy*)go;
 		if (!go->enabled) {
 			if (enemy != nullptr && enemy->spawned)
 				handleDeath(camera, go, enemyPool);
 			return;
 		}
-		
+
 		getSprite(spriteId);
 
 		/*Uint32 current = engine->getElapsedTime();
 		float dT = (current - dt)*10;
-		int framesToUpdate = floor(dT * 2); 
+		int framesToUpdate = floor(dT * 2);
 
 		if (framesToUpdate > 0) {
 			frameCounter += framesToUpdate;
@@ -217,14 +213,14 @@ public:
 
 		bool flip = false;
 		if (enemy != nullptr)
-			flip = enemy->flip;						
+			flip = enemy->flip;
 
 		go->collideRect.h = textureRect.h;    		//Set bounding box collider dimension to draw dimensions
 		go->collideRect.w = textureRect.w;			//ugly implementation I know
 		go->collideRect.x = go->position.x - camera->window.x;
 		go->collideRect.y = go->position.y + camera->window.y;
 		spriteSheet->draw(int(go->position.x - camera->window.x), int(go->position.y + camera->window.y), totalFrames, &textureRect, flip);
-		
+
 	}
 
 	void Destroy() {

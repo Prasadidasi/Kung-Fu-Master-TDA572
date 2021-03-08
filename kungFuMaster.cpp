@@ -25,6 +25,7 @@ const float GAME_SPEED = 10.f; //adjust speed according to levels
 #include "enemy.h"
 #include "camera.h"
 #include "animator.h"
+#include "spawnhandler.h"
 #include "audiomanager.h"
 #include "game.h"
 

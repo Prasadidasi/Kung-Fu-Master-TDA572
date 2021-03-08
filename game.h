@@ -17,6 +17,7 @@ class Game : public GameObject
 	Camera* camera;
 	Animator* animator;
 	AudioManager* audioManager;
+	SpawnHandler* spawnHandler;
 
 	Sprite* background;
 	Sprite* background_header;
@@ -61,7 +62,7 @@ public:
 		player->AddReceiver(this);
 		game_objects.insert(player);
 
-		grapplerPool.Create(10);
+		grapplerPool.Create(15);
 		for (auto enemy = grapplerPool.pool.begin(); enemy != grapplerPool.pool.end(); enemy++) {
 			(*enemy)->animIds = { "GRAPWALK", "GRAPATTACK", "GRAPHIT", "GRAPDEATH", "GRAPGRAB" };
 
@@ -141,6 +142,8 @@ public:
 		audioManager->createSoundFx(ASSETS_DIR "enemyDeath.wav", "ENEMYDEATH");
 		audioManager->createSoundFx(ASSETS_DIR "playerDeath.wav", "PLAYERDEATH");
 		
+		spawnHandler = new SpawnHandler();
+		spawnHandler->Create(player);
 
 		score = 0;
 	}
@@ -151,8 +154,9 @@ public:
 		player->Init(Vector2D(1470, 210), camera);
 
 		for (int i = 0; i < 5; i++) {
-			grapplerPool.pool[i]->Init(Vector2D(1220 - 50 * i, 211), "GRAPPLER");
-			grapplerPool.pool[i]->GetComponent<RigidBodyComponent*>()->velocity.x = ENEMY_SPEED;
+			Enemy* enemy = grapplerPool.FirstAvailable();
+			enemy->Init(Vector2D(1220 - 50 * i, 211), "GRAPPLER");
+			enemy->GetComponent<RigidBodyComponent*>()->velocity.x = ENEMY_SPEED;
 		}
 
 		enabled = true;
@@ -173,24 +177,21 @@ public:
 		if (game_over) 
 			dt = 0;
 		
-
 		animator->dt = dt;
 		camera->UpdatePlayer(player);
 		for (auto go = game_objects.begin(); go != game_objects.end(); go++)
 			(*go)->Update(dt);
 
-		if (int(player->position.x) == 1200 && enemySpawn[0] == false) {
-			enemySpawn[0] = true;
-			for (int i = 0; i < 5; i++) {
-				Enemy* enemy = grapplerPool.FirstAvailable();
-				enemy->Init(Vector2D(1540 + 50*(i), 211), "GRAPPLER");
-				enemy->GetComponent<RigidBodyComponent*>()->velocity.x = -ENEMY_SPEED;
-				enemy->flip = true;
-			}
-		}
+		spawnHandler->Update(0, &grapplerPool, dt, 1100, 1130, true);
+		spawnHandler->Update(1, &grapplerPool, dt, 1000, 1200, false);
+		spawnHandler->Update(2, &grapplerPool, dt, 920, 930, true);
+		spawnHandler->Update(3, &grapplerPool, dt, 730, 750, false);
+		spawnHandler->Update(4, &grapplerPool, dt, 730, 750, true);
+		spawnHandler->Update(5, &grapplerPool, dt, 450, 500, true);
+		spawnHandler->Update(6, &grapplerPool, dt, 450, 500, false);
 		animator->setFaceDirection();
 		audioManager->Update(engine, dt);
-		//animator->Update();
+
 	}
 
 	virtual void Draw()
@@ -250,6 +251,7 @@ public:
 
 		if (m == LEVEL_WIN) {
 			haltTimer = true;
+			game_over = true;
 			Mix_HaltMusic();
 			Mix_PlayMusic(audioManager->getMusic("LEVELOVER"), 1);
 			player->GetComponent<PlayerBehaviourComponent*>()->isLevelOver = true;

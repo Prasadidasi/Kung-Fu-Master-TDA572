@@ -4,6 +4,7 @@ class Camera;
 class Enemy : public GameObject {
 public:
 	char* enemyType;
+	bool dead = false;
 	bool firstGrab = true;
 	bool grabPlayer = false;
 	bool flip = false;
