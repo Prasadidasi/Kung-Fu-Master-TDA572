@@ -62,5 +62,11 @@
     <ClInclude Include="audiomanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="knife.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="spawnhandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

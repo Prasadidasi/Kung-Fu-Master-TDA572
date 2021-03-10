@@ -24,14 +24,13 @@ class Game : public GameObject
 	Sprite* player_health;
 
 	unsigned int score = 0;
-	int timer = 2000;
+	int timer = 1900;
 	int lives = MAX_LIVES;
 	float enemyHealth = 1.f;
 	float playerHealth = 1.f;
 	bool game_over = false;
 	bool level_win = false;
 	bool haltTimer = false;
-	bool enemySpawn[10] = { false };
 	SDL_Color playerColor = { 255,0,0,255 };
 	SDL_Color enemyColor = { 255,0,255,255 };
 
@@ -208,7 +207,7 @@ public:
 		spawnHandler->Update(6, &grapplerPool, dt, 570, 590, "GRAPPLER", false);
 		spawnHandler->Update(7, &throwerPool, dt, 1050, 1090, "THROWER", false);
 		spawnHandler->Update(8, &throwerPool, dt, 600, 620, "THROWER", true);
-		spawnHandler->Update(9, &throwerPool, dt, 820, 850, "THROWER", true);
+		spawnHandler->Update(9, &throwerPool, dt, 820, 850, "THROWER", false);
 		spawnHandler->Update(10, &throwerPool, dt, 420, 440, "THROWER", false);
 
 		animator->setFaceDirection(dt);
@@ -233,7 +232,6 @@ public:
 				animator->animateGo(enemy, camera, &throwerPool, animator->getEnemyState(enemy, player));
 			for (auto knife : knifePool.pool)
 				animator->animateGo(knife, camera, &throwerPool, "KNIFE");
-
 		}
 
 		engine->drawText(420, 10, "LIVES");
@@ -295,7 +293,6 @@ public:
 			game_over = true;
 			Mix_HaltMusic();
 			Mix_PlayMusic(audioManager->getMusic("LEVELOVER"), 1);
-			player->GetComponent<PlayerBehaviourComponent*>()->isLevelOver = true;
 		}
 
 		if (m == GAME_OVER) {

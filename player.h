@@ -69,6 +69,7 @@ public:
 	virtual void Update(float dt)
 	{
 		if (inRange(115,125) && isLevelOver == false) {
+			isLevelOver = true;
 			go->Send(LEVEL_WIN);
 			return;
 		}

@@ -64,8 +64,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\SDL-GL\SDL2-2.0.14\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\SDL-GL\SDL2-2.0.14\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\SDL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\SDL\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -115,8 +115,10 @@
     <ClInclude Include="enemy.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="game_object.h" />
+    <ClInclude Include="knife.h" />
     <ClInclude Include="object_pool.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="spawnhandler.h" />
     <ClInclude Include="Vector2D.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
