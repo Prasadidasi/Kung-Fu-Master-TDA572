@@ -9,7 +9,7 @@
 #define PLAYER_HEIGHT 63
 #define PLAYER_WIDTH 24
 #define PLAYER_SPEED 10
-#define MAX_LIVES 3
+#define MAX_LIVES 1
 #define ENEMY_SPEED 15
 #define KNIFE_SPEED 12
 

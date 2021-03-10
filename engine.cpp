@@ -46,6 +46,13 @@ bool Engine::init(int width, int height)
 		return false;
 	}
 
+	gameOverFont = TTF_OpenFont("assets/Kungfu_Master.ttf", 48);
+	if (gameOverFont == NULL)
+	{
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "font cannot be created! SDL_Error: %s\n", SDL_GetError());
+		return false;
+	}
+
 	// initialize the keys
 	key.punch = false;	key.left = false;	key.right = false, key.esc = false;
 	key.kick = false;	key.down = false;	key.up = false;	   key.repeat = false;
@@ -73,6 +80,9 @@ void Engine::destroy()
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 
+	TTF_CloseFont(font);
+	TTF_CloseFont(gameOverFont);
+	TTF_Quit();
 	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
@@ -166,7 +176,7 @@ Sprite * Engine::createSprite(const char * path)
 	return sprite;
 }
 
-void Engine::drawText(int x, int y, const char* msg, int r , int g , int b )
+void Engine::drawText(int x, int y, const char* msg, int r , int g , int b)
 {
 	SDL_Color color = { r, g, b };  // this is the color in rgb format, maxing out all would give you the color white, and it will be your text's color
 
@@ -176,6 +186,22 @@ void Engine::drawText(int x, int y, const char* msg, int r , int g , int b )
 
 	int w = 0;
 	int h = 0;
+	SDL_QueryTexture(msg_texture, NULL, NULL, &w, &h);
+	SDL_Rect dst_rect = { x, y, w, h };
+
+	SDL_RenderCopy(renderer, msg_texture, NULL, &dst_rect);
+
+	SDL_DestroyTexture(msg_texture);
+	SDL_FreeSurface(surf);
+}
+
+void Engine::drawGameOverText(int x, int y, const char* msg, int r , int g , int b)
+{
+	SDL_Color color = {r, g, b }; 
+	SDL_Surface* surf = TTF_RenderText_Solid(gameOverFont, msg, color); 
+	SDL_Texture* msg_texture = SDL_CreateTextureFromSurface(renderer, surf); 
+
+	int w = 0, h = 0;
 	SDL_QueryTexture(msg_texture, NULL, NULL, &w, &h);
 	SDL_Rect dst_rect = { x, y, w, h };
 

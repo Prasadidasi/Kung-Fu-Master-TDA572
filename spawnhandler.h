@@ -14,7 +14,22 @@ public:
 		return ((x - high) * (x - low) <= 0);
 	}
 
-	void Update(int position, ObjectPool<Enemy> *enemyPool, float dt, int low, int high, bool flip) {
+	void spawnKnife(Enemy* enemy, Camera* camera, ObjectPool<Knife>* knifePool) {
+		Knife* knife = knifePool->FirstAvailable();
+		if (knife == nullptr)
+			return;
+		Vector2D pos, window;
+		knife->flip = enemy->flip;
+		pos.x = enemy->position.x;
+		pos.y = enemy->position.y + 20;
+		window.x = camera->window.x;
+		window.y = camera->window.y;
+		knife->Init(pos, window);
+		knife->GetComponent<RigidBodyComponent*>()->velocity.x = enemy->flip ? -KNIFE_SPEED : KNIFE_SPEED;
+		knife->thrown = true;
+	}
+
+	void Update(int position, ObjectPool<Enemy> *enemyPool, float dt, int low, int high, char* enemyType, bool flip) {
 		if (dt <= 0)
 			return;
 
@@ -25,13 +40,21 @@ public:
 				Enemy* enemy = enemyPool->FirstAvailable();
 				if (enemy == NULL)
 					continue;
-				enemy->grabPlayer = false;
-				enemy->enabled = true;
+				if (enemyType == "GRAPPLER") {
+					enemy->grabPlayer = false;
+					enemy->firstGrab = true;
+					enemy->Init(Vector2D(flip ? spawn + 50 * i : spawn - 50 * i, 211), enemyType);
+				}
+				else if (enemyType == "THROWER") {
+					i = 4;
+					enemy->hitPoints = 2;
+					enemy->throwKnife = false;
+					enemy->throwerHit = false;
+					enemy->Init(Vector2D(flip ? spawn : spawn, 205), enemyType);
+				}
 				enemy->dead = false;
-				enemy->firstGrab = true;
-				enemy->Init(Vector2D(flip? spawn + 50*i: spawn - 50*i, 211), "GRAPPLER");
-				enemy->GetComponent<RigidBodyComponent*>()->velocity.x = flip ? -ENEMY_SPEED : ENEMY_SPEED;
 				enemy->flip = flip;
+				enemy->GetComponent<RigidBodyComponent*>()->velocity.x = flip ? -ENEMY_SPEED : ENEMY_SPEED;
 			}
 		}
 	}

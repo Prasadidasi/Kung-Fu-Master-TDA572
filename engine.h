@@ -59,6 +59,7 @@ public:
 
 	// Draws the given text.
 	void drawText(int x, int y, const char* msg, int r = 255, int g = 255, int b = 255);
+	void drawGameOverText(int x, int y, const char* msg, int r, int g, int b);
 
 	// Return the total time spent in the game, in seconds.
 	float getElapsedTime();
@@ -86,6 +87,7 @@ private:
 	SDL_Renderer * renderer;
 
 	TTF_Font* font;
+	TTF_Font* gameOverFont;
 
 	KeyStatus key;
 	SDL_KeyCode keyPress;

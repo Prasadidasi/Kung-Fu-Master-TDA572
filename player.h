@@ -5,6 +5,7 @@ class Player : public GameObject
 {
 public:
 
+	bool dead = false;
 	int lives;
 	int health;
 	bool grabbed = false;
@@ -19,6 +20,7 @@ public:
 	{
 		this->position = position;
 		SDL_Log("Player::Init");
+		this->id = "PLAYER";
 		GameObject::Init();
 		this->camera = camera;
 	}
@@ -66,7 +68,7 @@ public:
 
 	virtual void Update(float dt)
 	{
-		if (inRange(110,120) && isLevelOver == false) {
+		if (inRange(115,125) && isLevelOver == false) {
 			go->Send(LEVEL_WIN);
 			return;
 		}
@@ -79,18 +81,18 @@ public:
 		
 		Engine::KeyStatus keys;
 		engine->getKeyStatus(keys);
-		if (keys.right) {
+		if (keys.right && !keys.down && !keys.up && !keys.kick && !keys.punch) {
 			velocity.x = PLAYER_SPEED * dt;
 			Move();
 		}
-		if (keys.left) {
+		if (keys.left && !keys.down && !keys.up && !keys.kick && !keys.punch) {
 			velocity.x = -PLAYER_SPEED * dt;
 			Move();
 		}
 	}
 
 	void MoveOnStairs(float dt) {
-		SDL_Delay(200);
+		SDL_Delay(100);
 		if (stride && !step) {
 			go->position.x = go->position.x - stepWidth;
 		}

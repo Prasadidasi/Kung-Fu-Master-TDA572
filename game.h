@@ -13,7 +13,6 @@ class Game : public GameObject
 
 	Engine* engine;
 	Player* player;
-	Enemy* enemy;
 	Camera* camera;
 	Animator* animator;
 	AudioManager* audioManager;
@@ -23,14 +22,14 @@ class Game : public GameObject
 	Sprite* background_header;
 	Sprite* enemy_health;
 	Sprite* player_health;
-	Sprite* life_sprite;
 
 	unsigned int score = 0;
-	int timer = 1500;
+	int timer = 2000;
 	int lives = MAX_LIVES;
 	float enemyHealth = 1.f;
 	float playerHealth = 1.f;
 	bool game_over = false;
+	bool level_win = false;
 	bool haltTimer = false;
 	bool enemySpawn[10] = { false };
 	SDL_Color playerColor = { 255,0,0,255 };
@@ -55,10 +54,16 @@ public:
 		player_behaviour->Create(engine, player, &game_objects);
 		CollideComponent* playerGrapplerCollision = new CollideComponent();
 		playerGrapplerCollision->Create(engine, player, &game_objects, reinterpret_cast<ObjectPool<GameObject>*>(&grapplerPool));
+		CollideComponent* playerThrowerCollision = new CollideComponent();
+		playerThrowerCollision->Create(engine, player, &game_objects, reinterpret_cast<ObjectPool<GameObject>*>(&throwerPool));
+		CollideComponent* playerKnifeCollision = new CollideComponent();
+		playerKnifeCollision->Create(engine, player, &game_objects, reinterpret_cast<ObjectPool<GameObject>*>(&knifePool));
 
 		player->Create();
 		player->AddComponent(player_behaviour);
 		player->AddComponent(playerGrapplerCollision);
+		player->AddComponent(playerThrowerCollision);
+		player->AddComponent(playerKnifeCollision);
 		player->AddReceiver(this);
 		game_objects.insert(player);
 
@@ -67,7 +72,7 @@ public:
 			(*enemy)->animIds = { "GRAPWALK", "GRAPATTACK", "GRAPHIT", "GRAPDEATH", "GRAPGRAB" };
 
 			EnemyBehaviorComponent* enemyBehavior = new EnemyBehaviorComponent();
-			enemyBehavior->Create(engine, *enemy, &game_objects, &knifePool);
+			enemyBehavior->Create(engine, *enemy, player, &game_objects, &knifePool);
 			RigidBodyComponent* enemyBody = new RigidBodyComponent();
 			enemyBody->Create(engine, *enemy, &game_objects);
 
@@ -77,13 +82,13 @@ public:
 			(*enemy)->AddReceiver(this);
 			game_objects.insert(*enemy);
 		}
-		
+
 		throwerPool.Create(2);
 		for (auto enemy = throwerPool.pool.begin(); enemy != throwerPool.pool.end(); enemy++) {
-			(*enemy)->animIds = { "THROWALK", "THROWATTACK", "THROWHIT", "THROWDEATH"};
+			(*enemy)->animIds = { "THROWALK", "THROWATTACK", "THROWHIT", "THROWDEATH", "THROWIDLE" };
 
 			EnemyBehaviorComponent* enemyBehavior = new EnemyBehaviorComponent();
-			enemyBehavior->Create(engine, *enemy, &game_objects, &knifePool);
+			enemyBehavior->Create(engine, *enemy, player, &game_objects, &knifePool);
 			RigidBodyComponent* enemyBody = new RigidBodyComponent();
 			enemyBody->Create(engine, *enemy, &game_objects);
 
@@ -94,30 +99,33 @@ public:
 			game_objects.insert(*enemy);
 		}
 
-		knifePool.Create(10);
+		knifePool.Create(4);
 		for (auto knife = knifePool.pool.begin(); knife != knifePool.pool.end(); knife++)
 		{
 			KnifeBehaviourComponent* behaviour = new KnifeBehaviourComponent();
 			behaviour->Create(engine, *knife, &game_objects);
-			RenderComponent* render = new RenderComponent();
-			render->Create(engine, *knife, &game_objects, ASSETS_DIR "knife.png");
+			RigidBodyComponent* knifeBody = new RigidBodyComponent();
+			knifeBody->Create(engine, *knife, &game_objects);
 			(*knife)->Create();
 			(*knife)->AddComponent(behaviour);
-			(*knife)->AddComponent(render);
+			(*knife)->AddComponent(knifeBody);
+			(*knife)->AddReceiver(this);
+			game_objects.insert(*knife);
 		}
 
 		animator = new Animator();
 		animator->Create(engine, camera, ASSETS_DIR "player_single.png"); //IDLE Player animation
 		animator->AddSpriteSheet(engine, ASSETS_DIR "player_single.png", 1, "PLAYER_IDLE");
-		animator->AddSpriteSheet(engine, ASSETS_DIR "player_single.png", 1, "PLAYER_IDLE_LEFT");
-		animator->AddSpriteSheet(engine, ASSETS_DIR "player_single.png", 1, "PLAYER_IDLE_RIGHT");
 		animator->AddSpriteSheet(engine, ASSETS_DIR "player_left.png", 4, "PLAYER_LEFT");
 		animator->AddSpriteSheet(engine, ASSETS_DIR "player_right.png", 4, "PLAYER_RIGHT");
 		animator->AddSpriteSheet(engine, ASSETS_DIR "player_down.png", 1, "PLAYER_DOWN");
 		animator->AddSpriteSheet(engine, ASSETS_DIR "player_jump.png", 5, "PLAYER_UP");
 		animator->AddSpriteSheet(engine, ASSETS_DIR "player_standing_kick.png", 3, "PLAYER_KICK");
 		animator->AddSpriteSheet(engine, ASSETS_DIR "player_standing_punch.png", 4, "PLAYER_PUNCH");
+		animator->AddSpriteSheet(engine, ASSETS_DIR "player_down_punch.png", 4, "PLAYER_DOWN_PUNCH");
+		animator->AddSpriteSheet(engine, ASSETS_DIR "player_down_kick.png", 3, "PLAYER_DOWN_KICK");
 		animator->AddSpriteSheet(engine, ASSETS_DIR "player_death.png", 2, "PLAYER_DEATH");
+		animator->AddSpriteSheet(engine, ASSETS_DIR "player_grabbed.png", 1, "PLAYER_GRABBED");
 
 		//Enemy spritehseets
 		animator->AddSpriteSheet(engine, ASSETS_DIR "grappler_attack.png", 4, "GRAPATTACK");
@@ -126,9 +134,11 @@ public:
 		animator->AddSpriteSheet(engine, ASSETS_DIR "grappler_death.png", 2, "GRAPDEATH");
 		animator->AddSpriteSheet(engine, ASSETS_DIR "grappler_grab.png", 1, "GRAPGRAB");
 		animator->AddSpriteSheet(engine, ASSETS_DIR "thrower_walk.png", 4, "THROWALK");
-		animator->AddSpriteSheet(engine, ASSETS_DIR "thrower_attack.png", 2, "THROWATK");
-		animator->AddSpriteSheet(engine, ASSETS_DIR "thrower_hit.png", 2, "THROWHIT");
-		animator->AddSpriteSheet(engine, ASSETS_DIR "thrower_death.png", 2, "THROWDEAD");
+		animator->AddSpriteSheet(engine, ASSETS_DIR "thrower_attack.png", 2, "THROWATTACK");
+		animator->AddSpriteSheet(engine, ASSETS_DIR "thrower_hit.png", 1, "THROWHIT");
+		animator->AddSpriteSheet(engine, ASSETS_DIR "thrower_death.png", 2, "THROWDEATH");
+		animator->AddSpriteSheet(engine, ASSETS_DIR "thrower_idle.png", 1, "THROWIDLE");
+		animator->AddSpriteSheet(engine, ASSETS_DIR "knife.png", 1, "KNIFE");
 
 		audioManager = new AudioManager();
 		audioManager->createMusicFx(ASSETS_DIR "kungfu_backgroundMusic.mp3", "BGM");
@@ -141,7 +151,7 @@ public:
 		audioManager->createSoundFx(ASSETS_DIR "grab.wav", "GRAB");
 		audioManager->createSoundFx(ASSETS_DIR "enemyDeath.wav", "ENEMYDEATH");
 		audioManager->createSoundFx(ASSETS_DIR "playerDeath.wav", "PLAYERDEATH");
-		
+
 		spawnHandler = new SpawnHandler();
 		spawnHandler->Create(player);
 
@@ -156,6 +166,12 @@ public:
 		for (int i = 0; i < 5; i++) {
 			Enemy* enemy = grapplerPool.FirstAvailable();
 			enemy->Init(Vector2D(1220 - 50 * i, 211), "GRAPPLER");
+			enemy->GetComponent<RigidBodyComponent*>()->velocity.x = ENEMY_SPEED;
+		}
+
+		for (int i = 0; i < 1; i++) {
+			Enemy* enemy = throwerPool.FirstAvailable();
+			enemy->Init(Vector2D(650 - 50 * i, 205), "THROWER");
 			enemy->GetComponent<RigidBodyComponent*>()->velocity.x = ENEMY_SPEED;
 		}
 
@@ -174,22 +190,28 @@ public:
 			engine->quit();
 		}
 
-		if (game_over) 
+		if (game_over)
 			dt = 0;
-		
+
 		animator->dt = dt;
 		camera->UpdatePlayer(player);
 		for (auto go = game_objects.begin(); go != game_objects.end(); go++)
 			(*go)->Update(dt);
 
-		spawnHandler->Update(0, &grapplerPool, dt, 1100, 1130, true);
-		spawnHandler->Update(1, &grapplerPool, dt, 1000, 1200, false);
-		spawnHandler->Update(2, &grapplerPool, dt, 920, 930, true);
-		spawnHandler->Update(3, &grapplerPool, dt, 730, 750, false);
-		spawnHandler->Update(4, &grapplerPool, dt, 730, 750, true);
-		spawnHandler->Update(5, &grapplerPool, dt, 450, 500, true);
-		spawnHandler->Update(6, &grapplerPool, dt, 450, 500, false);
-		animator->setFaceDirection();
+		spawnHandler->Update(0, &grapplerPool, dt, 1100, 1130, "GRAPPLER", true);
+		spawnHandler->Update(1, &grapplerPool, dt, 1000, 1030, "GRAPPLER", false);
+		spawnHandler->Update(2, &grapplerPool, dt, 920, 930, "GRAPPLER", true);
+		spawnHandler->Update(3, &grapplerPool, dt, 730, 750, "GRAPPLER", false);
+		spawnHandler->Update(4, &grapplerPool, dt, 630, 650, "GRAPPLER", true);
+		spawnHandler->Update(5, &grapplerPool, dt, 450, 500, "GRAPPLER", true);
+		spawnHandler->Update(6, &grapplerPool, dt, 450, 500, "GRAPPLER", false);
+		spawnHandler->Update(6, &grapplerPool, dt, 570, 590, "GRAPPLER", false);
+		spawnHandler->Update(7, &throwerPool, dt, 1050, 1090, "THROWER", false);
+		spawnHandler->Update(8, &throwerPool, dt, 600, 620, "THROWER", true);
+		spawnHandler->Update(9, &throwerPool, dt, 820, 850, "THROWER", true);
+		spawnHandler->Update(10, &throwerPool, dt, 420, 440, "THROWER", false);
+
+		animator->setFaceDirection(dt);
 		audioManager->Update(engine, dt);
 
 	}
@@ -199,15 +221,20 @@ public:
 		engine->clearWindow();
 
 		background->drawBackground(&camera->window);
-		background_header->draw(0, 0);
-		//player_health->draw(115,10);
+		background_header->draw(0, 0);;
 		enemy_health->RenderHPBar(115, 30, enemyHealth, enemyColor);
 		player_health->RenderHPBar(115, 10, playerHealth, playerColor);
 
 		animator->animatePlayer(player, camera);
-		if (!game_over)
+		if (!game_over) {
 			for (auto enemy : grapplerPool.pool)
 				animator->animateGo(enemy, camera, &grapplerPool, animator->getEnemyState(enemy, player));
+			for (auto enemy : throwerPool.pool)
+				animator->animateGo(enemy, camera, &throwerPool, animator->getEnemyState(enemy, player));
+			for (auto knife : knifePool.pool)
+				animator->animateGo(knife, camera, &throwerPool, "KNIFE");
+
+		}
 
 		engine->drawText(420, 10, "LIVES");
 		engine->drawText(340, 10, "SCORE");
@@ -225,8 +252,11 @@ public:
 		sprintf(msg, "%4d", Score());
 		engine->drawText(344, 30, msg);
 
+		if (game_over && !level_win)
+			engine->drawGameOverText(100, 90, "GAME OVER", 0, 0, 0);
 
-		//life_sprite->draw(1470, 240);
+		if (level_win)
+			engine->drawGameOverText(100, 90, "LEVEL WIN", 255, 255, 32);
 
 		engine->swapBuffers();
 	}
@@ -237,19 +267,30 @@ public:
 			Enemy* enemy = (Enemy*)go;
 			animator->enemyHit(camera, enemy, enemy->animIds[2]);
 			audioManager->playSound("ENEMYDEATH");
-			score += 200;
+			score += (enemy->enemyType == "GRAPPLER" ) ? 200 : 500;
+			enemyHealth -= (enemyHealth / 35);
+		}
+
+		if (m == THROW_KNIFE) {
+			Enemy* enemy = (Enemy*)go;
+			spawnHandler->spawnKnife(enemy, camera, &knifePool);
+		}
+
+		if (m == KNIFE_HIT) {
+			playerHealth -= 0.05;
+			score -= 50;
 		}
 
 		if (m == PLAYER_GRABBED) {
 			Enemy* enemy = (Enemy*)go;
 			enemy->grabPlayer = true;
 			playerHealth -= 0.005;
-			if (playerHealth <= 0.f) 
+			if (playerHealth <= 0.f)
 				player->Send(GAME_OVER);
-			
 		}
 
 		if (m == LEVEL_WIN) {
+			level_win = true;
 			haltTimer = true;
 			game_over = true;
 			Mix_HaltMusic();
@@ -259,6 +300,7 @@ public:
 
 		if (m == GAME_OVER) {
 			game_over = true;
+			lives = (lives == 0) ? 0 : lives--;
 			player->enabled = false;
 			Mix_HaltMusic();
 			Mix_PlayMusic(audioManager->getMusic("GAMEOVER"), 1);

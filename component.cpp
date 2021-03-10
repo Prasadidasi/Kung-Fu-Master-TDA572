@@ -2,7 +2,6 @@
 #include "game_object.h"
 #include "engine.h"
 
-
 void Component::Create(Engine * engine, GameObject * go, std::set<GameObject*>* game_objects)
 {
 	this->go = go;
@@ -57,8 +56,14 @@ void CollideComponent::Update(float dt)
 			}
 			if (SDL_HasIntersection(&go->collideRect, &go0->collideRect) && (keys.kick == false && keys.punch == false))
 			{
-				go->Receive(GRAB, go);
-				go0->Receive(GRAB, go0);
+				if (go0->getID() == "GRAPPLER") {
+					go->Receive(GRAB, go);
+					go0->Receive(GRAB, go0);
+				}
+				if (go0->getID() == "KNIFE") {
+					go->Receive(KNIFE_HIT, go);
+					go0->Receive(KNIFE_HIT, go0);
+				}
 			}
 		}
 	}
