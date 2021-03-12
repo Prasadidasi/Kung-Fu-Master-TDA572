@@ -28,7 +28,6 @@ bool Engine::init(int width, int height)
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Window could not be created! SDL_Error: %s\n", SDL_GetError());
 		return false;
 	}
-	
 	//Create renderer for window
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	if (renderer == NULL)
@@ -56,7 +55,6 @@ bool Engine::init(int width, int height)
 	// initialize the keys
 	key.punch = false;	key.left = false;	key.right = false, key.esc = false;
 	key.kick = false;	key.down = false;	key.up = false;	   key.repeat = false;
-	keyPress = SDLK_UNKNOWN;
 
 	//initialize direction player is facing in
 	faceDirection = 0;
@@ -101,8 +99,6 @@ void Engine::processInput()
 	while (SDL_PollEvent(&event))
 	{
 		if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
-
-			keyPress = (event.type == SDL_KEYDOWN) ? (SDL_KeyCode)event.key.keysym.sym : SDLK_UNKNOWN;
 			if (event.key.repeat == 0)
 				key.repeat = true;
 			else
@@ -214,10 +210,6 @@ void Engine::drawGameOverText(int x, int y, const char* msg, int r , int g , int
 float Engine::getElapsedTime()
 {
 	return SDL_GetTicks() / 1000.f;
-}
-
-void Engine::getKeyPressed(SDL_KeyCode& keyPressed) {
-	keyPressed = keyPress;
 }
 
 void Sprite::draw(int x, int y)

@@ -1,2 +1,0 @@
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\Debug\KungFuMaster.exe
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\Debug\KungFuMaster.pdb

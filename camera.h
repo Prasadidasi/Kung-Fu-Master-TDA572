@@ -14,9 +14,11 @@ public:
 	}
 
 	void UpdatePlayer(Player* player) {
+
 		double xPos = player->position.x;
 		double yPos = player->position.y;
 
+		//camera always centered on the player
 		window.x = (xPos + player->player_width / 2) - SCREEN_WIDTH / 2;
 		window.y = (yPos + player->player_height / 2) - SCREEN_HEIGHT / 2;
 
@@ -26,7 +28,7 @@ public:
 		if (window.y < 0)
 			window.y = 0;
 
-		if (window.x > LEVEL_WIDTH - window.w)
+		if (window.x > LEVEL_WIDTH - window.w)		//handle edge conditions
 			window.x = LEVEL_WIDTH - window.w;
 
 		if (window.y > LEVEL_HEIGHT - window.h) {

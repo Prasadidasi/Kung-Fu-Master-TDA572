@@ -2,9 +2,7 @@
 #include <map>
 
 class Animator {
-	int frameCounter;
 	int totalFrames;
-	float timer;
 	float fps;
 	float deathSpeed;
 	bool flip;
@@ -15,8 +13,6 @@ class Animator {
 	Sprite* spriteSheet;
 	Sprite* idleSprite;
 	SDL_Rect textureRect;
-	const int player_height = 63;
-	float lastTime;
 
 	std::map<char*, Sprite*> sprites;
 	std::map<char*, Sprite*>::iterator spriteItr;
@@ -30,13 +26,10 @@ public:
 
 	void Create(Engine* engine, Camera* camera, char* sprite_name) {
 		flip = false;
-		frameCounter = 0;
-		timer = 0;
 		deathSpeed = 5.f;
 		this->engine = engine;
 		this->camera = camera;
 		engine->getFaceDirection(faceDirection);
-		lastTime = SDL_GetTicks();
 
 		idleSprite = engine->createSprite(sprite_name);
 		playerSprite = sprite_name;
@@ -64,7 +57,7 @@ public:
 
 		if (enemy->throwerHit) {
 			enemy->throwerHit = false;
-			return enemy->animIds[2];
+			return enemy->animIds[2];	//Throw
 		}
 
 		if (abs(player->position.x - enemy->position.x) > 200) {
@@ -165,35 +158,7 @@ public:
 			return;
 		}
 
-		Engine::KeyStatus keys;
-		engine->getKeyStatus(keys);
-
-		SDL_KeyCode keyPressed;
-		engine->getKeyPressed(keyPressed);
-		char* spriteId = "PLAYER_IDLE";
-
-		if ((keys.right && !keys.left) || (keys.left && !keys.right)) 
-			spriteId = "PLAYER_LEFT";
-
-		if (keys.punch)
-			spriteId = "PLAYER_PUNCH";
-
-		if (keys.kick)
-			spriteId = "PLAYER_KICK";
-	
-		if (keys.down && !keys.up) {
-			spriteId = "PLAYER_DOWN";
-			if (keys.punch)
-				spriteId = "PLAYER_DOWN_PUNCH";
-			else if (keys.kick)
-				spriteId = "PLAYER_DOWN_KICK";
-		}
-
-		if (keys.up && !keys.down)
-			spriteId = "PLAYER_UP";
-
-		if (player->grabbed)
-			spriteId = "PLAYER_GRABBED";
+		char* spriteId = player->getPlayerSprite();
 
 		/*Uint32 current = SDL_GetTicks();
 		Uint32 elapsedTime = (current - lastTime)/1000;
@@ -211,7 +176,10 @@ public:
 			timer -= fps;
 			lastTime = current;
 		}*/
-
+		if (spriteId == NULL) {
+			SDL_Log("SpriteID NULL, cannot animate");
+			return;
+		}
 		getSprite(spriteId);
 		int frame = int(engine->getElapsedTime()*10) % totalFrames; //TODO: have better timer implementation
 		if (frame > totalFrames)
@@ -245,7 +213,6 @@ public:
 
 		int frame = (SDL_GetTicks() / 100) % totalFrames; //TODO: have better timer implementation
 		(textureRect).x = frame * (textureRect).w;
-		//lastTime = current;
 
 		go->collideRect.h = textureRect.h;    		//Set bounding box collider dimension to draw dimensions
 		go->collideRect.w = textureRect.w;			//ugly implementation I know
@@ -257,6 +224,6 @@ public:
 
 	void Destroy() {
 		sprites.clear();
-		sprites.clear();
+		spriteAttrib.clear();
 	}
 };

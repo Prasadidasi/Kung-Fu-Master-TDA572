@@ -1,8 +1,4 @@
 #pragma once
-
-
-bool change_direction = false;
-
 class Game : public GameObject
 {
 	std::set<GameObject*> game_objects;
@@ -14,6 +10,7 @@ class Game : public GameObject
 	Engine* engine;
 	Player* player;
 	Camera* camera;
+	InputHandler* inputHandler;
 	Animator* animator;
 	AudioManager* audioManager;
 	SpawnHandler* spawnHandler;
@@ -39,8 +36,11 @@ public:
 	virtual void Create(Engine* engine)
 	{
 		SDL_Log("Game::Create");
-		camera = new Camera();
 		this->engine = engine;
+		camera = new Camera();
+		inputHandler = new InputHandler();
+		audioManager = new AudioManager();
+		audioManager->Create(engine, player, &game_objects);
 
 		background_header = engine->createSprite(ASSETS_DIR "background-header.jpg");
 		background = engine->createSprite(ASSETS_DIR "background-level1.jpg");
@@ -48,7 +48,6 @@ public:
 		player_health = engine->createSprite(ASSETS_DIR "player_health.png");
 
 		player = new Player();
-		player->playerSprite = engine->createSprite(ASSETS_DIR "player_single.png");
 		PlayerBehaviourComponent* player_behaviour = new PlayerBehaviourComponent();
 		player_behaviour->Create(engine, player, &game_objects);
 		CollideComponent* playerGrapplerCollision = new CollideComponent();
@@ -63,6 +62,7 @@ public:
 		player->AddComponent(playerGrapplerCollision);
 		player->AddComponent(playerThrowerCollision);
 		player->AddComponent(playerKnifeCollision);
+		player->AddComponent(audioManager);
 		player->AddReceiver(this);
 		game_objects.insert(player);
 
@@ -139,7 +139,7 @@ public:
 		animator->AddSpriteSheet(engine, ASSETS_DIR "thrower_idle.png", 1, "THROWIDLE");
 		animator->AddSpriteSheet(engine, ASSETS_DIR "knife.png", 1, "KNIFE");
 
-		audioManager = new AudioManager();
+		
 		audioManager->createMusicFx(ASSETS_DIR "kungfu_backgroundMusic.mp3", "BGM");
 		audioManager->createMusicFx(ASSETS_DIR "kungfu_gameOver.mp3", "GAMEOVER");
 		audioManager->createMusicFx(ASSETS_DIR "kungfu_gameStart.mp3", "GAMESTART");
@@ -160,7 +160,7 @@ public:
 	virtual void Init()
 	{
 		camera->Init(SCREEN_WIDTH, SCREEN_HEIGHT);
-		player->Init(Vector2D(1470, 210), camera);
+		player->Init(Vector2D(1470, 210));
 
 		for (int i = 0; i < 5; i++) {
 			Enemy* enemy = grapplerPool.FirstAvailable();
@@ -194,6 +194,8 @@ public:
 
 		animator->dt = dt;
 		camera->UpdatePlayer(player);
+		inputHandler->Update(engine, player, dt);
+
 		for (auto go = game_objects.begin(); go != game_objects.end(); go++)
 			(*go)->Update(dt);
 
@@ -211,8 +213,6 @@ public:
 		spawnHandler->Update(10, &throwerPool, dt, 420, 440, "THROWER", false);
 
 		animator->setFaceDirection(dt);
-		audioManager->Update(engine, dt);
-
 	}
 
 	virtual void Draw()
@@ -297,7 +297,7 @@ public:
 
 		if (m == GAME_OVER) {
 			game_over = true;
-			lives = (lives == 0) ? 0 : lives--;
+			lives = (lives == 0) ? 0 : --lives;
 			player->enabled = false;
 			Mix_HaltMusic();
 			Mix_PlayMusic(audioManager->getMusic("GAMEOVER"), 1);
@@ -330,9 +330,11 @@ public:
 			(*go)->Destroy();
 
 		animator->Destroy();
+		audioManager->Destroy();
+		spawnHandler->Destroy();
 		background->destroy();
 		background_header->destroy();
-		player->Destroy();
-		grapplerPool.Destroy();
+		enemy_health->destroy();
+		player_health->destroy();
 	}
 };

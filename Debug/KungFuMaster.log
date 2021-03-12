@@ -1,18 +1,1 @@
-﻿  kungFuMaster.cpp
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\camera.h(20,48): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\camera.h(21,49): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(39,26): warning C4244: '=': conversion from 'Uint32' to 'float', possible loss of data
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(94,11): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(99,71): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(99,36): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(131,63): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(131,32): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(223,79): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(224,80): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(252,38): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\animator.h(253,38): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\game.h(278,1): warning C4305: '-=': truncation from 'double' to 'float'
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\game.h(285,1): warning C4305: '-=': truncation from 'double' to 'float'
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\audiomanager.h(30): warning C4715: 'AudioManager::getMusic': not all control paths return a value
-C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\audiomanager.h(36): warning C4715: 'AudioManager::getSound': not all control paths return a value
-  KungFuMaster.vcxproj -> C:\Users\psmit\Downloads\Masters\UGOT\Game Engine Architecture\Kung-Fu Master\Debug\KungFuMaster.exe
+﻿

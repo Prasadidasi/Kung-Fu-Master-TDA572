@@ -83,27 +83,3 @@ void RigidBodyComponent::Update(float dt)
 	//Forward Euler method:
 	go->position.x = go->position.x + velocity.x * dt;
 }
-
-/*void CameraComponent::Create(Engine* engine, GameObject* go, std::set<GameObject*>* game_objects, Camera* camera, const char* sprite_name)
-{
-	Component::Create(engine, go, game_objects);
-
-	sprite = engine->createSprite(sprite_name);
-	this->camera = camera;
-}
-
-void CameraComponent::Update(float dt)
-{
-	if (!go->enabled)
-		return;
-
-	if (sprite)
-		sprite->draw(int(go->position.x - camera->window.x), int(go->position.y - camera->window.y));
-}
-
-void CameraComponent::Destroy()
-{
-	if (sprite != NULL)
-		sprite->destroy();
-	sprite = NULL;
-}*/

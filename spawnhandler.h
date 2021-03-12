@@ -13,7 +13,8 @@ public:
 		int x = int(player->position.x);
 		return ((x - high) * (x - low) <= 0);
 	}
-
+	
+	//spawn knife when thrower is within range of player
 	void spawnKnife(Enemy* enemy, Camera* camera, ObjectPool<Knife>* knifePool) {
 		Knife* knife = knifePool->FirstAvailable();
 		if (knife == nullptr)
@@ -35,8 +36,8 @@ public:
 
 		if (inRange(low, high) && isEnemySpawned[position] == 0) {
 			isEnemySpawned[position] = 1;
-			for (int i = 0; i < 5; i++) {
-				int spawn = flip ? high + (SCREEN_WIDTH / 2): high - (SCREEN_WIDTH)/2;
+			for (int i = 0; i < 5; i++) {			//hardcoded grapplers to spawn in groups of 5
+				int spawn = flip ? high + (SCREEN_WIDTH / 2): high - (SCREEN_WIDTH)/2;	
 				Enemy* enemy = enemyPool->FirstAvailable();
 				if (enemy == NULL)
 					continue;
@@ -46,7 +47,7 @@ public:
 					enemy->Init(Vector2D(flip ? spawn + 50 * i : spawn - 50 * i, 211), enemyType);
 				}
 				else if (enemyType == "THROWER") {
-					i = 4;
+					i = 4;							//only one thrower needed, so setting index
 					enemy->hitPoints = 2;
 					enemy->throwKnife = false;
 					enemy->throwerHit = false;
@@ -57,5 +58,9 @@ public:
 				enemy->GetComponent<RigidBodyComponent*>()->velocity.x = flip ? -ENEMY_SPEED : ENEMY_SPEED;
 			}
 		}
+	}
+
+	void Destroy() {
+		isEnemySpawned.clear();
 	}
 };

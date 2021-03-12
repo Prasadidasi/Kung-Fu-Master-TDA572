@@ -1,28 +1,31 @@
 #pragma once
 
-class Camera;
 class Player : public GameObject
 {
+	char* playerSprite;				//spriteId of current player state
 public:
-
+	bool isLevelOver = false;
 	bool dead = false;
-	int lives;
 	int health;
 	bool grabbed = false;
 	const double player_width = 28;
 	const double player_height = 63;
-	Camera* camera;
-	Sprite* playerSprite;
-
 	virtual ~Player() { SDL_Log("Player::~Player"); }
 
-	virtual void Init(Vector2D position, Camera* camera)
+	virtual void Init(Vector2D position)
 	{
 		this->position = position;
 		SDL_Log("Player::Init");
 		this->id = "PLAYER";
 		GameObject::Init();
-		this->camera = camera;
+	}
+
+	virtual void setPlayerSprite(char* spriteId) {
+		this->playerSprite = spriteId;
+	}
+
+	char* getPlayerSprite() {
+		return this->playerSprite;
 	}
 
 	virtual void Receive(Message m, GameObject* go)
@@ -45,9 +48,9 @@ class PlayerBehaviourComponent : public Component
 	Vector2D velocity;
 	double stepHeight = 13;
 	double stepWidth = 8;
+	Player* player;
 
 public:
-	bool isLevelOver = false;
 	bool step = false;
 	bool stride = true;
 	virtual ~PlayerBehaviourComponent() {}
@@ -57,6 +60,7 @@ public:
 		Component::Create(engine, go, game_objects);
 		this->velocity.x = 0;
 		this->velocity.y = 0;
+		this->player = (Player*)go;
 	}
 
 	virtual void Init() {}
@@ -68,14 +72,14 @@ public:
 
 	virtual void Update(float dt)
 	{
-		if (inRange(115,125) && isLevelOver == false) {
-			isLevelOver = true;
+		if (inRange(115,125) && player->isLevelOver == false) {
+			player->isLevelOver = true;
 			go->Send(LEVEL_WIN);
 			return;
 		}
 
-		if (isLevelOver == true) {
-			if (go->position.x >= 20 || go->position.y >= 80) 
+		if (player->isLevelOver == true) {
+			if (go->position.x >= 20 || go->position.y >= 70) 
 				MoveOnStairs(dt);
 			return;
 		}
@@ -109,8 +113,7 @@ public:
 	// param move depends on the time, so the player moves always at the same speed on any computer
 	void Move()
 	{
-		Player* player = (Player*)go;
-		if (!player->grabbed)
+		if (!this->player->grabbed)
 			go->position.x += velocity.x;
 		
 		if (go->position.x < 0)

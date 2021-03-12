@@ -21,14 +21,14 @@ public:
 	// Destroys the sprite instance
 	void destroy();
 
-	// Draw the sprite at the given position.
-	// Valid coordinates are between (0,0) (upper left) and (width-32, height-32) (lower right).
-	// (All sprites are 32*32 pixels, clipping is not supported)
+	// Draw sprites depending on input
 	void draw(int x, int y);
 	void draw(int x, int y, int frames, SDL_Rect* windowRect, bool flip = false);
 	void draw(SDL_Rect rect);
 	void drawBackground(SDL_Rect* rect);
 	void RenderHPBar(int x, int y, float Percent, SDL_Color FGColor);
+
+	// Fetch sprite dimensions
 	void getDimensions(SDL_Rect* rect);
 };
 
@@ -63,23 +63,24 @@ public:
 
 	// Return the total time spent in the game, in seconds.
 	float getElapsedTime();
+
+	//Return player facing direction
 	void getFaceDirection(int& direction) { direction = this->faceDirection; };
 
 	struct KeyStatus
 	{
 		bool punch;
 		bool kick;
-		bool up; // space
+		bool up; 
 		bool down;
-		bool left; // left arrow
-		bool right; // right arrow
-		bool esc; // escape button
+		bool left; 
+		bool right; 
+		bool esc; 
 		bool repeat;
 	};
 
 	// Returns the keyboard status. If a flag is set, the corresponding key is being held down.
 	void getKeyStatus(KeyStatus& keys);
-	void getKeyPressed(SDL_KeyCode& keyPressed);
 	
 
 private:
@@ -90,7 +91,6 @@ private:
 	TTF_Font* gameOverFont;
 
 	KeyStatus key;
-	SDL_KeyCode keyPress;
 	int faceDirection;
 };
 

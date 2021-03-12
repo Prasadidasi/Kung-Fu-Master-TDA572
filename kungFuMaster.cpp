@@ -13,7 +13,7 @@
 #define ENEMY_SPEED 15
 #define KNIFE_SPEED 12
 
-const float GAME_SPEED = 10.f; //adjust speed according to levels
+const float GAME_SPEED = 10.f; //adjust initial game speed
 
 #include "engine.h"
 #include "object_pool.h"
@@ -23,6 +23,7 @@ const float GAME_SPEED = 10.f; //adjust speed according to levels
 #include "knife.h"
 #include "player.h"
 #include "enemy.h"
+#include "inputhandler.h"
 #include "camera.h"
 #include "animator.h"
 #include "spawnhandler.h"

@@ -59,17 +59,3 @@ public:
 	virtual void Create(Engine* engine, GameObject* go, std::set<GameObject*>* game_objects);
 	virtual void Update(float dt);
 };
-
-/*class CameraComponent : public Component
-{
-	Sprite* sprite;
-	Camera* camera;
-
-public:
-
-	virtual void Create(Engine* engine, GameObject* go, std::set<GameObject*>* game_objects, Camera* camera, const char* sprite_name);
-	virtual void Update(float dt);
-	virtual void Destroy();
-
-	Sprite* GetSprite() { return sprite; }
-};*/

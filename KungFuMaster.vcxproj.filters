@@ -68,5 +68,11 @@
     <ClInclude Include="spawnhandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inputhandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

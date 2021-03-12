@@ -1,7 +1,8 @@
 #pragma once
 
-class AudioManager {
+class AudioManager :public Component{
 public:
+	//One map each for music and sfx
 	std::map<char*, Mix_Chunk*> soundFx;
 	std::map<char*, Mix_Music*> musicFx;
 
@@ -35,7 +36,7 @@ public:
 				return itr.second;
 	}
 
-	void Update(Engine* engine, float dt) {
+	void Update(float dt) {
 		if (dt <= 0)
 			return;
 
